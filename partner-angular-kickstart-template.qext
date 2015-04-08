@@ -1,0 +1,11 @@
+{
+    "name": "partner-angular-kickstart-template",
+    "type": "mashup",
+     "appdata": {
+        "qDocName": "bar.qvf",
+        "qDocId": "bar.qvf"
+    },
+    "lists": [],
+    "cubes": [],
+    "allowPosition": true
+}

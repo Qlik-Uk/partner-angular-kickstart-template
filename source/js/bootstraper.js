@@ -10,7 +10,6 @@
     require.config( {
         baseUrl: ( config.isSecure ? "https://" : "http://" ) + config.host + (config.port ? ":" + config.port: "") + config.prefix + "resources"
     } );
-    
 
 
     var app = angular.module('awesomeQlikApp', ['ngRoute']);
@@ -23,24 +22,33 @@
     }]);
 
     // configure home controller
-    app.controller("HomeCtrl" , ["$scope", "QlikHelper", function($scope, QlikHelper) {
+    app.controller("HomeCtrl" , ["$scope",  "$q", "QlikHelperService", function($scope, $q, QlikHelperService) {
         console.info("in home controller");
-        QlikHelper();
+        $q.when(QlikHelperService).then(function (qlik) {
+            $(".qsObject").each(function() {
+                qlik.getObject(this, $(this).data("qsid"));
+            });
+        });
     }]);
 
 
     // configure other controller
-    app.controller("OtherCtrl" , ["$scope", "QlikHelper", function($scope, QlikHelper) {
+    app.controller("OtherCtrl" , ["$scope", "$q", "QlikHelperService", function($scope, $q, QlikHelperService) {
         console.info("in other controller");
-        QlikHelper();
+        $q.when(QlikHelperService).then(function (qlik) {
+            $(".qsObject").each(function() {
+                qlik.getObject(this, $(this).data("qsid"));
+            });
+        });
     }]);
 
 
     // configure a service that will instanciate Sense bar.QVF (replace with yours)
     // and then loop over all HTML DOM nodes that have the qsObject class and add Sense
     // visualizations
-    app.service("QlikHelper", function () {
-        return function () {    
+    app.service("QlikHelperService", ["$q", function ($q) {
+        var deferred = $q.defer();
+
             require( ["js/qlik"], function ( qlik ) {
                 var senseApp;
 
@@ -57,13 +65,12 @@
                 if (document.getElementById('CurrentSelections') && document.getElementById('CurrentSelections').childNodes.length === 0) {
                     senseApp.getObject( 'CurrentSelections', 'CurrentSelections' );
                 }
-           
-                $(".qsObject").each(function() {
-                    senseApp.getObject(this, $(this).data("qsid"));
-                });
-            });
-        }
-    });
+
+                deferred.resolve(senseApp);
+           });
+
+        return deferred.promise;
+    }]);
 
 
     angular.element(document).ready(function() {
